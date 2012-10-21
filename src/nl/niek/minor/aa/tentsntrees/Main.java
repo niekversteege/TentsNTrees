@@ -8,8 +8,8 @@ public class Main
 	 */
 	public static void main(String[] args)
 	{
-		// TODO Auto-generated method stub
-
+		TentTrees t = new TentTrees();
+		t.go();
 	}
 
 }
