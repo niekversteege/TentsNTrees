@@ -52,6 +52,8 @@ public class TentTrees
 		// according to logic.
 
 		// can we call placeTentsByHintNumbers recursively?
+		// expand lone tile method to count tiles with occupied trees as lone?
+		// call these until it is solved?
 		
 	}
 
