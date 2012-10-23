@@ -32,28 +32,93 @@ public class TentTrees
 
 	private void solve()
 	{
-		// look at rows and columns that should have zero tents
-		// mark those squares as grass
+		/*
+		 * look at rows and columns that should have zero tents mark the empty
+		 * tiles in there as grass
+		 */
 		makeEmptyColumnGrass();
 		makeEmptyRowsGrass();
+
+		/* mark tiles that have no adjacent tree as grass */
+		makeLoneTilesGrass();
+
+		/*
+		 * if number in hint equals number of empty tiles + number of existing
+		 * tents: make empty tiles tents.
+		 */
+		placeTentsByHintNumbers();
+
+		// Tents made before this point cannot be changed: they have to be there
+		// according to logic.
+
+		// can we call placeTentsByHintNumbers recursively?
 		
-		// mark squares that have no adjacent tree as grass
-		makeLoneSquaresGrass();
-		
-		// for every tree on the map
-		// check possible tent locations
-		// if 1 possibility; place there
-		// if this conflicts with another tent, move that tent
-		// if the conflicted tent has no alternative locations; error,
-		// unsolvable
-		// else if more locations
-		// place in first
-		// backtracking after this
 	}
 
-	private void makeLoneSquaresGrass()
+	/**
+	 * Check if the number of tents that are supposed to be in the row/column is
+	 * equal to the number of empty spots (plus the number of existing tents).
+	 * If so; put tents there.
+	 */
+	private void placeTentsByHintNumbers()
 	{
-		
+		int width = treesField.getWidth();
+		int height = treesField.getHeight();
+
+		for (int i = 0; i < width; i++)
+		{
+			int columnHint = treesField.getColumnHint(i);
+			if (columnHint != 0)
+			{
+				int nrOfEmptyOrTentTilesInColumn = treesField
+						.getNrOfEmptyOrTentTilesInColumn(i);
+
+				if (columnHint == nrOfEmptyOrTentTilesInColumn)
+				{
+					treesField.setEmptyColumnAsTents(i);
+				}
+			}
+		}
+
+		for (int i = 0; i < height; i++)
+		{
+			int rowHint = treesField.getRowHint(i);
+			if (rowHint != 0)
+			{
+				int nrOfEmptyOrTentTilesInRow = treesField
+						.getNrOfEmptyOrTentTilesInRow(i);
+
+				if (rowHint == nrOfEmptyOrTentTilesInRow)
+				{
+					treesField.setEmptyRowAsTents(i);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Find tiles that have no trees surrounding them (horizontally and vertically).
+	 * If found these are made to grass tiles since they cannot ever house a
+	 * tent.
+	 */
+	private void makeLoneTilesGrass()
+	{
+		int width = treesField.getWidth();
+		int height = treesField.getHeight();
+
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				if (treesField.isEmptyTile(i, j))
+				{
+					if (!treesField.hasAdjacentTrees(i, j))
+					{
+						treesField.setTileAsGrass(i, j);
+					}
+				}
+			}
+		}
 	}
 
 	private void makeEmptyRowsGrass()

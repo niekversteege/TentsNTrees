@@ -21,7 +21,7 @@ public class TreesField
 	/* Horizontally placed hints: per column */
 	private int[]			columnHints;
 
-	/* Vertically placed hints: per row*/
+	/* Vertically placed hints: per row */
 	private int[]			rowHints;
 
 	public TreesField()
@@ -76,7 +76,7 @@ public class TreesField
 	private boolean isPossible(int row, int column, TileTypes tile)
 	{
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	public final TileTypes getTile(int row, int column)
@@ -174,23 +174,169 @@ public class TreesField
 
 	public void makeRowGrass(int row)
 	{
-		for (int i = 0; i < treesField[row].length; i++)
+		for (int i = 0; i < DEFAULT_BOARD_WIDTH; i++)
 		{
 			if (treesField[row][i] == TileTypes.EMPTY_TILE)
 			{
-				treesField[row][i] = TileTypes.GRASS_TILE;
+				setTileAsGrass(i, row);
 			}
 		}
 	}
 
 	public void makeColumnGrass(int column)
 	{
-		for (int i = 0; i < treesField[column].length; i++)
+		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
 		{
 			if (treesField[i][column] == TileTypes.EMPTY_TILE)
 			{
-				treesField[i][column] = TileTypes.GRASS_TILE;
+				setTileAsGrass(column, i);
 			}
 		}
+	}
+
+	public boolean isEmptyTile(int column, int row)
+	{
+		if (isWithinBounds(column, row))
+		{
+			return false;
+		}
+
+		return treesField[row][column] == TileTypes.EMPTY_TILE;
+	}
+
+	public boolean isGrassTile(int column, int row)
+	{
+		if (isWithinBounds(column, row))
+		{
+			return false;
+		}
+
+		return treesField[row][column] == TileTypes.GRASS_TILE;
+	}
+
+	public boolean isTreeTile(int column, int row)
+	{
+		if (isWithinBounds(column, row))
+		{
+			return false;
+		}
+
+		return treesField[row][column] == TileTypes.TREE_TILE;
+	}
+
+	public boolean isTentTile(int column, int row)
+	{
+		if (isWithinBounds(column, row))
+		{
+			return false;
+		}
+
+		return treesField[row][column] == TileTypes.TENT_TILE;
+	}
+
+	private boolean isWithinBounds(int column, int row)
+	{
+		return column < 0 || column >= DEFAULT_BOARD_WIDTH || row < 0
+				|| row >= DEFAULT_BOARD_HEIGHT;
+	}
+
+	public boolean hasAdjacentTrees(int column, int row)
+	{
+		if (isTreeTile(column + 1, row))
+		{
+			return true;
+		}
+		if (isTreeTile(column - 1, row))
+		{
+			return true;
+		}
+		if (isTreeTile(column, row + 1))
+		{
+			return true;
+		}
+		if (isTreeTile(column, row - 1))
+		{
+			return true;
+		}
+		if (isTreeTile(column - 1, row - 1))
+		{
+			return true;
+		}
+		if (isTreeTile(column + 1, row + 1))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean setTileAsGrass(int column, int row)
+	{
+		return setTile(row, column, TileTypes.GRASS_TILE);
+	}
+	
+	public boolean setTileAsTent(int column, int row)
+	{
+		return setTile(row, column, TileTypes.TENT_TILE);
+	}
+
+	public int getNrOfEmptyOrTentTilesInColumn(int column)
+	{
+		int retVal = 0;
+		
+		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
+		{
+			if (isEmptyTile(column, i) || isTentTile(column, i))
+			{
+				retVal++;
+			}
+		}
+		return retVal;
+	}
+	
+	public int getNrOfEmptyOrTentTilesInRow(int row)
+	{
+		int retVal = 0;
+		
+		for (int i = 0; i < DEFAULT_BOARD_WIDTH; i++)
+		{
+			if (isEmptyTile(i, row) || isTentTile(i, row))
+			{
+				retVal++;
+			}
+		}
+		return retVal;
+	}
+
+	public boolean setEmptyColumnAsTents(int column)
+	{
+		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
+		{
+			if (isEmptyTile(column, i))
+			{
+				if (!setTileAsTent(column, i))
+				{
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	public boolean setEmptyRowAsTents(int row)
+	{
+		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
+		{
+			if (isEmptyTile(i, row))
+			{
+				if (!setTileAsTent(i, row))
+				{
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
 }
