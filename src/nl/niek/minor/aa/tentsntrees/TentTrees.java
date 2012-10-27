@@ -1,11 +1,20 @@
 package nl.niek.minor.aa.tentsntrees;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TentTrees
 {
 
-	private TentTreesPrinter	printer;
+	private TentTreesPrinter				printer;
 
-	private TreesField			treesField	= null;
+	private TreesField						treesField	= null;
+
+	private boolean							solved		= false;
+
+	private boolean							unsolvable	= false;
+
+	private ArrayList<TileCoordinate>[][]	possibleTentLocations;
 
 	public TentTrees()
 	{
@@ -25,6 +34,12 @@ public class TentTrees
 		printer.printTreesField(treesField);
 
 		solve();
+
+		if (unsolvable)
+		{
+			printer.printLine("Puzzle is unsolvable.");
+			return;
+		}
 
 		printer.printLine("After: ");
 		printer.printTreesField(treesField);
@@ -48,13 +63,78 @@ public class TentTrees
 		 */
 		placeTentsByHintNumbers();
 
-		// Tents made before this point cannot be changed: they have to be there
-		// according to logic.
+		/*
+		 * Tents made before this point cannot be changed: they have to be there
+		 * according to logic.
+		 */
 
-		// can we call placeTentsByHintNumbers recursively?
-		// expand lone tile method to count tiles with occupied trees as lone?
-		// call these until it is solved?
-		
+		/*
+		 * Make a list of possible tent locations per tree.
+		 */
+		initPossibleTentLocations();
+
+		recursiveSolve(0, 0);
+
+		/*
+		 * can we call placeTentsByHintNumbers recursively? expand lone tile
+		 * method to count tiles with occupied trees as lone? call these until
+		 * it is solved?
+		 */
+
+	}
+
+	private void initPossibleTentLocations()
+	{
+		for (int row = 0; row < treesField.getHeight(); row++)
+		{
+			for (int col = 0; col < treesField.getWidth(); col++)
+			{
+				possibleTentLocations[row][col] = new ArrayList<TileCoordinate>();
+
+				if (treesField.isTreeTile(col, row))
+				{
+					List<TileCoordinate> possibilitiesForTree = treesField
+							.getPossibleTentLocations(col, row);
+
+					if (possibilitiesForTree.isEmpty())
+					{
+						unsolvable = true;
+						return;
+					}
+
+					possibleTentLocations[row][col]
+							.addAll(possibilitiesForTree);
+				}
+			}
+		}
+	}
+
+	private void recursiveSolve(int row, int column)
+	{
+		if (column == treesField.getWidth())
+		{
+			column = 0;
+			row++;
+		}
+		if (row == treesField.getHeight() || solved || unsolvable)
+		{
+			solved = true;
+			return;
+		}
+		if (treesField.isTreeTile(column, row))
+		{
+			for (TileCoordinate possibleTent : possibleTentLocations[row][column])
+			{
+				if (treesField.setTileAsTent(possibleTent))
+				{
+					recursiveSolve(row, column + 1);
+				}
+			}
+		}
+		else
+		{
+			recursiveSolve(row, column + 1);
+		}
 	}
 
 	/**
@@ -99,9 +179,9 @@ public class TentTrees
 	}
 
 	/**
-	 * Find tiles that have no trees surrounding them (horizontally and vertically).
-	 * If found these are made to grass tiles since they cannot ever house a
-	 * tent.
+	 * Find tiles that have no trees surrounding them (horizontally and
+	 * vertically). If found these are made to grass tiles since they cannot
+	 * ever house a tent.
 	 */
 	private void makeLoneTilesGrass()
 	{
@@ -158,6 +238,9 @@ public class TentTrees
 			treesField = new TreesField();
 			treesField.setDefault();
 		}
+
+		possibleTentLocations = new ArrayList[treesField.getHeight()][treesField
+				.getWidth()];
 	}
 
 }

@@ -1,28 +1,21 @@
 package nl.niek.minor.aa.tentsntrees;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TreesField
 {
 	private static final int	DEFAULT_BOARD_HEIGHT	= 5;
 
 	private static final int	DEFAULT_BOARD_WIDTH		= 5;
 
-	public enum TileTypes
-	{
-		EMPTY_TILE, GRASS_TILE, TREE_TILE, TENT_TILE;
-
-		public String toString()
-		{
-			return null;
-		}
-	}
-
-	private TileTypes[][]	treesField;
+	private TileTypes[][]		treesField;
 
 	/* Horizontally placed hints: per column */
-	private int[]			columnHints;
+	private int[]				columnHints;
 
 	/* Vertically placed hints: per row */
-	private int[]			rowHints;
+	private int[]				rowHints;
 
 	public TreesField()
 	{
@@ -73,10 +66,54 @@ public class TreesField
 		treesField[3][4] = TileTypes.TREE_TILE;
 	}
 
-	private boolean isPossible(int row, int column, TileTypes tile)
+	/**
+	 * Given coordinates should be an empty tile.
+	 * 
+	 * @param column
+	 * @param row
+	 * @return
+	 */
+	private boolean isTentPossible(int column, int row)
 	{
-		// TODO Auto-generated method stub
-		return true;
+		if (isEmptyTile(column, row))
+		{
+			return !columnIsFull(column) && !rowIsFull(row)
+					&& !hasAdjacentTent(column, row);
+		}
+
+		return false;
+	}
+
+	private boolean rowIsFull(int row)
+	{
+		int expectedNrOfTents = rowHints[row];
+		int nrOfTentsFound = 0;
+
+		for (int i = 0; i < DEFAULT_BOARD_WIDTH; i++)
+		{
+			if (treesField[row][i] == TileTypes.TENT_TILE)
+			{
+				nrOfTentsFound++;
+			}
+		}
+
+		return nrOfTentsFound >= expectedNrOfTents;
+	}
+
+	private boolean columnIsFull(int column)
+	{
+		int expectedNrOfTents = columnHints[column];
+		int nrOfTentsFound = 0;
+
+		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
+		{
+			if (treesField[i][column] == TileTypes.TENT_TILE)
+			{
+				nrOfTentsFound++;
+			}
+		}
+
+		return nrOfTentsFound >= expectedNrOfTents;
 	}
 
 	public final TileTypes getTile(int row, int column)
@@ -91,9 +128,17 @@ public class TreesField
 	 * @param tile
 	 * @return successful or not
 	 */
-	public final boolean setTile(int row, int column, TileTypes tile)
+	private final boolean setTile(int row, int column, TileTypes tile)
 	{
-		if (isPossible(row, column, tile))
+		if (tile == TileTypes.TENT_TILE)
+		{
+			if (isTentPossible(row, column))
+			{
+				treesField[row][column] = tile;
+				return true;
+			}
+		}
+		else
 		{
 			treesField[row][column] = tile;
 			return true;
@@ -196,42 +241,32 @@ public class TreesField
 
 	public boolean isEmptyTile(int column, int row)
 	{
-		if (isWithinBounds(column, row))
-		{
-			return false;
-		}
-
-		return treesField[row][column] == TileTypes.EMPTY_TILE;
+		return isTileType(column, row, TileTypes.EMPTY_TILE);
 	}
 
 	public boolean isGrassTile(int column, int row)
 	{
-		if (isWithinBounds(column, row))
-		{
-			return false;
-		}
-
-		return treesField[row][column] == TileTypes.GRASS_TILE;
+		return isTileType(column, row, TileTypes.GRASS_TILE);
 	}
 
 	public boolean isTreeTile(int column, int row)
 	{
-		if (isWithinBounds(column, row))
-		{
-			return false;
-		}
-
-		return treesField[row][column] == TileTypes.TREE_TILE;
+		return isTileType(column, row, TileTypes.TREE_TILE);
 	}
 
 	public boolean isTentTile(int column, int row)
+	{
+		return isTileType(column, row, TileTypes.TENT_TILE);
+	}
+
+	private boolean isTileType(int column, int row, TileTypes tile)
 	{
 		if (isWithinBounds(column, row))
 		{
 			return false;
 		}
 
-		return treesField[row][column] == TileTypes.TENT_TILE;
+		return treesField[row][column] == tile;
 	}
 
 	private boolean isWithinBounds(int column, int row)
@@ -240,29 +275,47 @@ public class TreesField
 				|| row >= DEFAULT_BOARD_HEIGHT;
 	}
 
+	/**
+	 * Does this tile have a tree above, below, left or right of it?
+	 * 
+	 * @param column
+	 * @param row
+	 * @return
+	 */
 	public boolean hasAdjacentTrees(int column, int row)
 	{
-		if (isTreeTile(column + 1, row))
+		return hasNeighbouringTile(column, row, TileTypes.TREE_TILE);
+	}
+
+	/**
+	 * Does this tile have a tree above. below, left or right of it which does
+	 * not yet have a tent occupying it?
+	 * 
+	 * @param column
+	 * @param row
+	 * @return
+	 */
+	public boolean hasUnoccupiedAdjacentTrees(int column, int row)
+	{
+
+		return false;
+	}
+
+	private boolean hasNeighbouringTile(int column, int row, TileTypes tile)
+	{
+		if (isTileType(column + 1, row, tile))
 		{
 			return true;
 		}
-		if (isTreeTile(column - 1, row))
+		if (isTileType(column - 1, row, tile))
 		{
 			return true;
 		}
-		if (isTreeTile(column, row + 1))
+		if (isTileType(column, row + 1, tile))
 		{
 			return true;
 		}
-		if (isTreeTile(column, row - 1))
-		{
-			return true;
-		}
-		if (isTreeTile(column - 1, row - 1))
-		{
-			return true;
-		}
-		if (isTreeTile(column + 1, row + 1))
+		if (isTileType(column, row - 1, tile))
 		{
 			return true;
 		}
@@ -270,11 +323,41 @@ public class TreesField
 		return false;
 	}
 
+	private boolean hasDiagonallyNeighbouringTile(int column, int row,
+			TileTypes tile)
+	{
+		if (isTileType(column + 1, row - 1, tile))
+		{
+			return true;
+		}
+		if (isTileType(column - 1, row + 1, tile))
+		{
+			return true;
+		}
+		if (isTileType(column - 1, row - 1, tile))
+		{
+			return true;
+		}
+		if (isTileType(column + 1, row + 1, tile))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	public boolean hasAdjacentTent(int column, int row)
+	{
+		return hasNeighbouringTile(column, row, TileTypes.TENT_TILE)
+				|| hasDiagonallyNeighbouringTile(column, row,
+						TileTypes.TENT_TILE);
+	}
+
 	public boolean setTileAsGrass(int column, int row)
 	{
 		return setTile(row, column, TileTypes.GRASS_TILE);
 	}
-	
+
 	public boolean setTileAsTent(int column, int row)
 	{
 		return setTile(row, column, TileTypes.TENT_TILE);
@@ -283,7 +366,7 @@ public class TreesField
 	public int getNrOfEmptyOrTentTilesInColumn(int column)
 	{
 		int retVal = 0;
-		
+
 		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
 		{
 			if (isEmptyTile(column, i) || isTentTile(column, i))
@@ -293,11 +376,11 @@ public class TreesField
 		}
 		return retVal;
 	}
-	
+
 	public int getNrOfEmptyOrTentTilesInRow(int row)
 	{
 		int retVal = 0;
-		
+
 		for (int i = 0; i < DEFAULT_BOARD_WIDTH; i++)
 		{
 			if (isEmptyTile(i, row) || isTentTile(i, row))
@@ -320,10 +403,10 @@ public class TreesField
 				}
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	public boolean setEmptyRowAsTents(int row)
 	{
 		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
@@ -336,7 +419,75 @@ public class TreesField
 				}
 			}
 		}
-		
+
 		return true;
+	}
+
+	/**
+	 * Given coordinates must have a tree.
+	 * 
+	 * @param column
+	 * @param row
+	 * @return
+	 */
+	public List<TileCoordinate> getPossibleTentLocations(int column, int row)
+	{
+		if (!isTreeTile(column, row))
+		{
+			throw new IllegalArgumentException("Given tile must be a tree.");
+		}
+
+		List<TileCoordinate> possibleTentLocations = new ArrayList<TileCoordinate>();
+
+		int columnPlusOne = column + 1;
+		int columnMinOne = column - 1;
+		int rowPlusOne = row + 1;
+		int rowMinOne = row - 1;
+
+		if (isPossibleTentLocation(row, columnPlusOne))
+		{
+			possibleTentLocations.add(new TileCoordinate(columnPlusOne, row));
+		}
+
+		if (isPossibleTentLocation(row, columnMinOne))
+		{
+			possibleTentLocations.add(new TileCoordinate(columnMinOne, row));
+		}
+
+		if (isPossibleTentLocation(rowPlusOne, column))
+		{
+			possibleTentLocations.add(new TileCoordinate(column, rowPlusOne));
+		}
+
+		if (isPossibleTentLocation(rowMinOne, column))
+		{
+			possibleTentLocations.add(new TileCoordinate(column, rowMinOne));
+		}
+
+		return possibleTentLocations;
+	}
+
+	private boolean isPossibleTentLocation(int row, int columnPlusOne)
+	{
+		if (isEmptyTile(columnPlusOne, row))
+		{
+			if (isTentPossible(columnPlusOne, row))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Set the tile at the given coordinate as a tent.
+	 * 
+	 * @param possibleTent
+	 * @return Success: if returns false it is not possible to put a tent there.
+	 */
+	public boolean setTileAsTent(TileCoordinate possibleTent)
+	{
+		return setTileAsTent(possibleTent.getColumn(), possibleTent.getRow());
 	}
 }
