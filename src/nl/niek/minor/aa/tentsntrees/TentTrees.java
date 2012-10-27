@@ -1,7 +1,6 @@
 package nl.niek.minor.aa.tentsntrees;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class TentTrees
 {
@@ -10,11 +9,11 @@ public class TentTrees
 
 	private TreesField						treesField	= null;
 
-	private boolean							solved		= false;
+	private boolean							stop		= false;
 
 	private boolean							unsolvable	= false;
 
-	private ArrayList<TileCoordinate>[][]	possibleTentLocations;
+	private ArrayList<TileCoordinate>[][]	surroundingEmptyTiles;
 
 	public TentTrees()
 	{
@@ -71,7 +70,7 @@ public class TentTrees
 		/*
 		 * Make a list of possible tent locations per tree.
 		 */
-		initPossibleTentLocations();
+		initSurroundingEmptyTiles();
 
 		recursiveSolve(0, 0);
 
@@ -83,27 +82,17 @@ public class TentTrees
 
 	}
 
-	private void initPossibleTentLocations()
+	private void initSurroundingEmptyTiles()
 	{
 		for (int row = 0; row < treesField.getHeight(); row++)
 		{
-			for (int col = 0; col < treesField.getWidth(); col++)
+			for (int column = 0; column < treesField.getWidth(); column++)
 			{
-				possibleTentLocations[row][col] = new ArrayList<TileCoordinate>();
-
-				if (treesField.isTreeTile(col, row))
+				if (treesField.isTreeTile(column, row))
 				{
-					List<TileCoordinate> possibilitiesForTree = treesField
-							.getPossibleTentLocations(col, row);
-
-					if (possibilitiesForTree.isEmpty())
-					{
-						unsolvable = true;
-						return;
-					}
-
-					possibleTentLocations[row][col]
-							.addAll(possibilitiesForTree);
+					surroundingEmptyTiles[row][column] = new ArrayList<TileCoordinate>();
+					surroundingEmptyTiles[row][column].addAll(treesField
+							.getSurroundingEmptyTiles(column, row));
 				}
 			}
 		}
@@ -111,26 +100,45 @@ public class TentTrees
 
 	private void recursiveSolve(int row, int column)
 	{
-		if (column == treesField.getWidth())
+		if (column >= treesField.getWidth())
 		{
 			column = 0;
 			row++;
 		}
-		if (row == treesField.getHeight() || solved || unsolvable)
+		if (row == treesField.getHeight() || stop || unsolvable)
 		{
-			solved = true;
+			stop = true;
 			return;
 		}
+		
+		printer.printLine("New recursiveSolve call for column: " + column + " row: " + row);
+		printer.printTreesField(treesField);
+		
 		if (treesField.isTreeTile(column, row))
 		{
-			for (TileCoordinate possibleTent : possibleTentLocations[row][column])
+			if (treesField.isUnoccupiedTree(column, row))
 			{
-				if (treesField.setTileAsTent(possibleTent))
+				for (TileCoordinate emptyTile : surroundingEmptyTiles[row][column])
 				{
-					recursiveSolve(row, column + 1);
+					if (treesField.canPlaceTent(emptyTile))
+					{
+						treesField.setTileAsTent(emptyTile);
+						recursiveSolve(row, column + 1);
+					}
 				}
 			}
+			else
+			{
+				recursiveSolve(row, column + 1);
+			}
 		}
+		/*
+		 * else if (treesField.isEmptyTile(column, row)) { if
+		 * (!treesField.hasAdjacentUnoccupiedTrees(column, row)) {
+		 * treesField.setTileAsGrass(column, row); }
+		 * 
+		 * recursiveSolve(row, column + 1); }
+		 */
 		else
 		{
 			recursiveSolve(row, column + 1);
@@ -188,15 +196,15 @@ public class TentTrees
 		int width = treesField.getWidth();
 		int height = treesField.getHeight();
 
-		for (int i = 0; i < height; i++)
+		for (int row = 0; row < height; row++)
 		{
-			for (int j = 0; j < width; j++)
+			for (int column = 0; column < width; column++)
 			{
-				if (treesField.isEmptyTile(i, j))
+				if (treesField.isEmptyTile(row, column))
 				{
-					if (!treesField.hasAdjacentTrees(i, j))
+					if (!treesField.hasAdjacentTrees(column, row))
 					{
-						treesField.setTileAsGrass(i, j);
+						treesField.setTileAsGrass(column, row);
 					}
 				}
 			}
@@ -239,7 +247,7 @@ public class TentTrees
 			treesField.setDefault();
 		}
 
-		possibleTentLocations = new ArrayList[treesField.getHeight()][treesField
+		surroundingEmptyTiles = new ArrayList[treesField.getHeight()][treesField
 				.getWidth()];
 	}
 
