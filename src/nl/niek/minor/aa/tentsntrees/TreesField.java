@@ -402,19 +402,19 @@ public class TreesField
 	{
 		List<TileCoordinate> surroundingTiles = new ArrayList<TileCoordinate>();
 
-		if (isTileType(column + 1, row, TileTypes.EMPTY_TILE))
+		if (isTileType(column + 1, row, tile))
 		{
 			surroundingTiles.add(new TileCoordinate(column + 1, row));
 		}
-		if (isTileType(column - 1, row, TileTypes.EMPTY_TILE))
+		if (isTileType(column - 1, row, tile))
 		{
 			surroundingTiles.add(new TileCoordinate(column - 1, row));
 		}
-		if (isTileType(column, row + 1, TileTypes.EMPTY_TILE))
+		if (isTileType(column, row + 1, tile))
 		{
 			surroundingTiles.add(new TileCoordinate(column, row + 1));
 		}
-		if (isTileType(column, row - 1, TileTypes.EMPTY_TILE))
+		if (isTileType(column, row - 1, tile))
 		{
 			surroundingTiles.add(new TileCoordinate(column, row - 1));
 		}

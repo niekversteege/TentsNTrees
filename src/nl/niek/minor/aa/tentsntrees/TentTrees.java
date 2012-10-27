@@ -100,7 +100,7 @@ public class TentTrees
 
 	private void recursiveSolve(int row, int column)
 	{
-		if (column >= treesField.getWidth())
+		if (column == treesField.getWidth())
 		{
 			column = 0;
 			row++;
@@ -110,10 +110,14 @@ public class TentTrees
 			stop = true;
 			return;
 		}
-		
-		printer.printLine("New recursiveSolve call for column: " + column + " row: " + row);
-		printer.printTreesField(treesField);
-		
+
+		/*
+		 * printer.printLine("New recursiveSolve call for column: " + column +
+		 * " row: " + row); printer.printTreesField(treesField);
+		 */
+
+		TileCoordinate currentTile = new TileCoordinate(column, row);
+
 		if (treesField.isTreeTile(column, row))
 		{
 			if (treesField.isUnoccupiedTree(column, row))
@@ -123,26 +127,36 @@ public class TentTrees
 					if (treesField.canPlaceTent(emptyTile))
 					{
 						treesField.setTileAsTent(emptyTile);
-						recursiveSolve(row, column + 1);
 					}
+					else
+					{
+						treesField.setTileAsGrass(emptyTile);
+					}
+				}
+			}
+		}
+		else if (treesField.isEmptyTile(column, row))
+		{
+			printer.printLine("empty tile found at col:" + column + " row:" + row);
+			
+			if (treesField.hasAdjacentUnoccupiedTrees(column, row))
+			{
+				if (treesField.canPlaceTent(currentTile))
+				{
+					treesField.setTileAsTent(currentTile);
+				}
+				else
+				{
+					treesField.setTileAsGrass(currentTile);
 				}
 			}
 			else
 			{
-				recursiveSolve(row, column + 1);
+				treesField.setTileAsGrass(currentTile);
 			}
 		}
-		/*
-		 * else if (treesField.isEmptyTile(column, row)) { if
-		 * (!treesField.hasAdjacentUnoccupiedTrees(column, row)) {
-		 * treesField.setTileAsGrass(column, row); }
-		 * 
-		 * recursiveSolve(row, column + 1); }
-		 */
-		else
-		{
-			recursiveSolve(row, column + 1);
-		}
+
+		recursiveSolve(row, column + 1);
 	}
 
 	/**
