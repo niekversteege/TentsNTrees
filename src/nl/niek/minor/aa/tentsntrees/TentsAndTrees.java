@@ -3,67 +3,33 @@ package nl.niek.minor.aa.tentsntrees;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TreesField
+public class TentsAndTrees
 {
-	private static final int	DEFAULT_BOARD_HEIGHT	= 5;
+	private int				height;
 
-	private static final int	DEFAULT_BOARD_WIDTH		= 5;
+	private int				width;
 
-	private TileTypes[][]		treesField;
+	private TileTypes[][]	gameField;
 
 	/* Horizontally placed hints: per column */
-	private int[]				columnHints;
+	private int[]			columnHints;
 
 	/* Vertically placed hints: per row */
-	private int[]				rowHints;
+	private int[]			rowHints;
 
-	public TreesField()
+	public TentsAndTrees(PlayingField playingField)
 	{
-		treesField = new TileTypes[DEFAULT_BOARD_HEIGHT][DEFAULT_BOARD_WIDTH];
-		columnHints = new int[DEFAULT_BOARD_WIDTH];
-		rowHints = new int[DEFAULT_BOARD_HEIGHT];
-		initBoard();
-	}
-
-	/**
-	 * Set whole field to EMPTY.
-	 */
-	private void initBoard()
-	{
-		for (int i = 0; i < treesField.length; i++)
+		if (playingField == null)
 		{
-			for (int j = 0; j < treesField[i].length; j++)
-			{
-				treesField[i][j] = TileTypes.EMPTY_TILE;
-			}
+			throw new IllegalArgumentException("PlayingField is null.");
 		}
-	}
 
-	/**
-	 * use default example board as seen on
-	 * http://www.brainbashers.com/tentshelp.asp.
-	 */
-	public void setDefault()
-	{
-		/* Set hints */
-		columnHints[0] = 2;
-		columnHints[1] = 0;
-		columnHints[2] = 1;
-		columnHints[3] = 0;
-		columnHints[4] = 2;
+		gameField = playingField.getPlayingField();
+		columnHints = playingField.getColumnHints();
+		rowHints = playingField.getRowHints();
 
-		rowHints[0] = 2;
-		rowHints[1] = 0;
-		rowHints[2] = 2;
-		rowHints[3] = 0;
-		rowHints[4] = 1;
-
-		/* Set trees */
-		treesField[0][1] = TileTypes.TREE_TILE;
-		treesField[1][4] = TileTypes.TREE_TILE;
-		treesField[2][1] = TileTypes.TREE_TILE;
-		treesField[2][3] = TileTypes.TREE_TILE;
-		treesField[3][4] = TileTypes.TREE_TILE;
+		this.height = gameField.length;
+		this.width = gameField[0].length;
 	}
 
 	public boolean canPlaceTent(TileCoordinate tile)
@@ -71,7 +37,7 @@ public class TreesField
 		if (isEmptyTile(tile.getColumn(), tile.getRow()))
 		{
 			return !columnIsFull(tile.getColumn()) && !rowIsFull(tile.getRow())
-					&& !hasAdjacentTentAllDirections(tile);
+					&& !hasAdjacentTentInAnyDirection(tile);
 		}
 
 		return false;
@@ -82,9 +48,9 @@ public class TreesField
 		int expectedNrOfTents = rowHints[row];
 		int nrOfTentsFound = 0;
 
-		for (int i = 0; i < DEFAULT_BOARD_WIDTH; i++)
+		for (int i = 0; i < width; i++)
 		{
-			if (treesField[row][i] == TileTypes.TENT_TILE)
+			if (gameField[row][i] == TileTypes.TENT_TILE)
 			{
 				nrOfTentsFound++;
 			}
@@ -98,20 +64,15 @@ public class TreesField
 		int expectedNrOfTents = columnHints[column];
 		int nrOfTentsFound = 0;
 
-		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
+		for (int i = 0; i < height; i++)
 		{
-			if (treesField[i][column] == TileTypes.TENT_TILE)
+			if (gameField[i][column] == TileTypes.TENT_TILE)
 			{
 				nrOfTentsFound++;
 			}
 		}
 
 		return nrOfTentsFound >= expectedNrOfTents;
-	}
-
-	public final TileTypes getTile(int row, int column)
-	{
-		return treesField[row][column];
 	}
 
 	/**
@@ -122,7 +83,12 @@ public class TreesField
 	 */
 	private void setTile(int row, int column, TileTypes tile)
 	{
-		treesField[row][column] = tile;
+		if (tile == TileTypes.TREE_TILE)
+		{
+			throw new IllegalArgumentException("Cannot change tree tiles!");
+		}
+
+		gameField[row][column] = tile;
 	}
 
 	public final int getColumnHint(int row)
@@ -137,12 +103,12 @@ public class TreesField
 
 	public final int getHeight()
 	{
-		return DEFAULT_BOARD_HEIGHT;
+		return height;
 	}
 
 	public final int getWidth()
 	{
-		return DEFAULT_BOARD_WIDTH;
+		return width;
 	}
 
 	public final String getPrintableField()
@@ -158,12 +124,12 @@ public class TreesField
 
 		fieldString.append("\n");
 
-		for (int i = 0; i < treesField.length; i++)
+		for (int i = 0; i < gameField.length; i++)
 		{
 			fieldString.append(rowHints[i] + " ");
-			for (int j = 0; j < treesField[i].length; j++)
+			for (int j = 0; j < gameField[i].length; j++)
 			{
-				fieldString.append("[" + getTileString(treesField[i][j]) + "]");
+				fieldString.append("[" + getTileString(gameField[i][j]) + "]");
 			}
 			fieldString.append("\n");
 		}
@@ -197,7 +163,7 @@ public class TreesField
 
 	public void makeRowGrass(int row)
 	{
-		for (int i = 0; i < DEFAULT_BOARD_WIDTH; i++)
+		for (int i = 0; i < width; i++)
 		{
 			if (isEmptyTile(i, row))
 			{
@@ -208,7 +174,7 @@ public class TreesField
 
 	public void makeColumnGrass(int column)
 	{
-		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
+		for (int i = 0; i < height; i++)
 		{
 			if (isEmptyTile(column, i))
 			{
@@ -244,13 +210,12 @@ public class TreesField
 			return false;
 		}
 
-		return treesField[row][column] == tile;
+		return gameField[row][column] == tile;
 	}
 
 	private boolean isWithinBounds(int column, int row)
 	{
-		return column < 0 || column >= DEFAULT_BOARD_WIDTH || row < 0
-				|| row >= DEFAULT_BOARD_HEIGHT;
+		return column < 0 || column >= width || row < 0 || row >= height;
 	}
 
 	/**
@@ -310,7 +275,7 @@ public class TreesField
 		return false;
 	}
 
-	public boolean hasAdjacentTentAllDirections(TileCoordinate tile)
+	public boolean hasAdjacentTentInAnyDirection(TileCoordinate tile)
 	{
 		int column = tile.getColumn();
 		int row = tile.getRow();
@@ -330,71 +295,69 @@ public class TreesField
 		setTile(row, column, TileTypes.TENT_TILE);
 	}
 
-	public int getNrOfEmptyOrTentTilesInColumn(int column)
+	public List<TileCoordinate> getEmptyTentsInColumn(int column)
 	{
-		int retVal = 0;
+		List<TileCoordinate> retVal = new ArrayList<TileCoordinate>();
 
-		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
+		for (int i = 0; i < height; i++)
 		{
 			if (isEmptyTile(column, i) || isTentTile(column, i))
 			{
-				retVal++;
+				retVal.add(new TileCoordinate(column, i));
 			}
 		}
 		return retVal;
 	}
 
-	public int getNrOfEmptyOrTentTilesInRow(int row)
+	public List<TileCoordinate> getEmptyTentsInRow(int row)
 	{
-		int retVal = 0;
+		List<TileCoordinate> retVal = new ArrayList<TileCoordinate>();
 
-		for (int i = 0; i < DEFAULT_BOARD_WIDTH; i++)
+		for (int i = 0; i < width; i++)
 		{
 			if (isEmptyTile(i, row) || isTentTile(i, row))
 			{
-				retVal++;
+				retVal.add(new TileCoordinate(i, row));
 			}
 		}
 		return retVal;
 	}
 
-	public void setEmptyColumnAsTents(int column)
-	{
-		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
-		{
-			if (isEmptyTile(column, i))
-			{
-				setTileAsTent(column, i);
-			}
-		}
-	}
-
-	public void setEmptyRowAsTents(int row)
-	{
-		for (int i = 0; i < DEFAULT_BOARD_HEIGHT; i++)
-		{
-			if (isEmptyTile(i, row))
-			{
-				setTileAsTent(i, row);
-			}
-		}
-	}
-
 	/**
-	 * Given coordinates must have a tree.
+	 * Given coordinates must have a tree. Excludes empty tiles that conflict
+	 * with existing tents and sets these as grass.
 	 * 
 	 * @param column
 	 * @param row
 	 * @return
 	 */
-	public List<TileCoordinate> getSurroundingEmptyTiles(int column, int row)
+	public List<TileCoordinate> getSurroundingEmptyTiles(
+			TileCoordinate currentTree)
 	{
+		int column = currentTree.getColumn();
+		int row = currentTree.getRow();
+
 		if (!isTreeTile(column, row))
 		{
 			throw new IllegalArgumentException("Given tile must be a tree.");
 		}
 
-		return getSurroundingTiles(column, row, TileTypes.EMPTY_TILE);
+		List<TileCoordinate> retVal = new ArrayList<TileCoordinate>();
+
+		for (TileCoordinate t : getSurroundingTiles(column, row,
+				TileTypes.EMPTY_TILE))
+		{
+			if (hasAdjacentTentInAnyDirection(t))
+			{
+				/* setTileAsGrass(t); */
+			}
+			else
+			{
+				retVal.add(t);
+			}
+		}
+
+		return retVal;
 	}
 
 	private List<TileCoordinate> getSurroundingTiles(int column, int row,
@@ -402,21 +365,21 @@ public class TreesField
 	{
 		List<TileCoordinate> surroundingTiles = new ArrayList<TileCoordinate>();
 
-		if (isTileType(column + 1, row, tile))
-		{
-			surroundingTiles.add(new TileCoordinate(column + 1, row));
-		}
 		if (isTileType(column - 1, row, tile))
 		{
 			surroundingTiles.add(new TileCoordinate(column - 1, row));
 		}
-		if (isTileType(column, row + 1, tile))
-		{
-			surroundingTiles.add(new TileCoordinate(column, row + 1));
-		}
 		if (isTileType(column, row - 1, tile))
 		{
 			surroundingTiles.add(new TileCoordinate(column, row - 1));
+		}
+		if (isTileType(column + 1, row, tile))
+		{
+			surroundingTiles.add(new TileCoordinate(column + 1, row));
+		}
+		if (isTileType(column, row + 1, tile))
+		{
+			surroundingTiles.add(new TileCoordinate(column, row + 1));
 		}
 
 		return surroundingTiles;
@@ -470,5 +433,37 @@ public class TreesField
 	private boolean isUnoccupiedTree(TileCoordinate tile)
 	{
 		return isUnoccupiedTree(tile.getColumn(), tile.getRow());
+	}
+
+	public boolean hasAdjacentUnoccupiedTrees(TileCoordinate tile)
+	{
+		return hasAdjacentUnoccupiedTrees(tile.getColumn(), tile.getRow());
+	}
+
+	public boolean hasTent(TileCoordinate tree)
+	{
+		return getSurroundingTiles(tree.getColumn(), tree.getRow(),
+				TileTypes.TENT_TILE).size() > 0;
+	}
+
+	public TreeCoordinate getTree(TileCoordinate newTent)
+	{
+		List<TileCoordinate> adjacentTrees = getSurroundingTiles(
+				newTent.getColumn(), newTent.getRow(), TileTypes.TREE_TILE);
+
+		if (adjacentTrees.size() == 1)
+		{
+			return new TreeCoordinate(adjacentTrees.get(0));
+		}
+
+		return null;
+	}
+
+	public void setTilesAsGrass(List<TileCoordinate> surroundingEmptyTiles)
+	{
+		for (TileCoordinate t : surroundingEmptyTiles)
+		{
+			setTileAsGrass(t);
+		}
 	}
 }

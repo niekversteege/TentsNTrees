@@ -22,5 +22,22 @@ public class TileCoordinate
 		return column;
 	}
 	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof TileCoordinate)
+		{
+			TileCoordinate c = (TileCoordinate) obj;
+			
+			return this.getColumn() == c.getColumn() && this.getRow() == c.getRow();
+		}
+		
+		return false;
+	}
 	
+	@Override
+	public String toString()
+	{
+		return "Column: " + column + " Row: " + row;
+	}
 }

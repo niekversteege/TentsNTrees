@@ -7,9 +7,9 @@ public class TentTreesPrinter
 		
 	}
 	
-	public void printTreesField(final TreesField treesField)
+	public void printTentsAndTrees(final TentsAndTrees tentsAndTrees)
 	{		
-		printLine(treesField.getPrintableField());
+		printLine(tentsAndTrees.getPrintableField());
 	}
 	
 	public void printNumber(Integer number)

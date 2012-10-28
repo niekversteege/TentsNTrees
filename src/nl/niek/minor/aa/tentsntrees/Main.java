@@ -8,7 +8,7 @@ public class Main
 	 */
 	public static void main(String[] args)
 	{
-		TentTrees t = new TentTrees();
+		TentTreesSolver t = new TentTreesSolver();
 		t.go();
 	}
 
