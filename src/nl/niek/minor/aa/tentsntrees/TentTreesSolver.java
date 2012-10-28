@@ -47,15 +47,15 @@ public class TentTreesSolver
 		{
 			boolean validated = validate();
 			printer.printLine("Validated: " + validated);
-			
+
 			if (validated)
 			{
 				tentsAndTrees.fillEmptySpots();
 			}
-			
+
 			printer.printLine("After: ");
 			printer.printTentsAndTrees(tentsAndTrees);
-			
+
 		}
 		else
 		{
@@ -121,6 +121,17 @@ public class TentTreesSolver
 		return recursiveSolve(trees.get(0));
 	}
 
+	/**
+	 * Visit every tree. For every tree; get a list of tiles where a tent could
+	 * be placed. If there's only one; place it here. Otherwise loop over the
+	 * list of possible tent locations. Try that location and call
+	 * recursiveSolve again to see if the rest of the playing field can be set.
+	 * If it cannot finish the game: remove the tent and try the next location
+	 * in the list.
+	 * 
+	 * @param currentTree
+	 * @return
+	 */
 	private boolean recursiveSolve(TreeCoordinate currentTree)
 	{
 		if (currentTree == null)
@@ -210,41 +221,11 @@ public class TentTreesSolver
 		return trees.get(visitedTrees);
 	}
 
-	/***
-	 * TODO: cannot find tree in 8x8 example at: row 2 col 1
-	 * 
-	 * @param currentTile
-	 * @return
-	 */
-	private TileCoordinate getNextTree(TileCoordinate currentTile)
-	{
-		int startRow = currentTile.getRow();
-		int startColumn = currentTile.getColumn() + 1;
-
-		if (startColumn == tentsAndTrees.getWidth())
-		{
-			startColumn = 0;
-			startRow++;
-		}
-
-		for (int i = startRow; i < tentsAndTrees.getHeight(); i++)
-		{
-			for (int j = startColumn; j < tentsAndTrees.getWidth(); j++)
-			{
-				if (tentsAndTrees.isTreeTile(j, i))
-				{
-					return new TileCoordinate(j, i);
-				}
-			}
-		}
-
-		return null;
-	}
-
 	/**
 	 * Check if the number of tents that are supposed to be in the row/column is
 	 * equal to the number of empty spots (plus the number of existing tents).
-	 * If so; put tents there.
+	 * If so; put tents there. This method also adds those tents to the tree
+	 * index we keep in this class.
 	 */
 	private void placeTentsByHintNumbers()
 	{
@@ -265,6 +246,12 @@ public class TentTreesSolver
 					for (TileCoordinate empty : emptyTentsInColumn)
 					{
 						tentsAndTrees.setTileAsTent(empty);
+
+						/*
+						 * After setting a tent in the field also set the tree
+						 * list in this class to have the tent so we can keep
+						 * track of it.
+						 */
 						TreeCoordinate tree = tentsAndTrees.getTree(empty);
 
 						if (tree != null)
@@ -290,6 +277,12 @@ public class TentTreesSolver
 					for (TileCoordinate empty : emptyTentsInRow)
 					{
 						tentsAndTrees.setTileAsTent(empty);
+
+						/*
+						 * After setting a tent in the field also set the tree
+						 * list in this class to have the tent so we can keep
+						 * track of it.
+						 */
 						TreeCoordinate tree = tentsAndTrees.getTree(empty);
 
 						if (tree != null)

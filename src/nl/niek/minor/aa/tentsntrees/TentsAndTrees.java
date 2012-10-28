@@ -275,7 +275,7 @@ public class TentsAndTrees
 		return false;
 	}
 
-	public boolean hasAdjacentTentInAnyDirection(TileCoordinate tile)
+	private boolean hasAdjacentTentInAnyDirection(TileCoordinate tile)
 	{
 		int column = tile.getColumn();
 		int row = tile.getRow();
@@ -391,46 +391,6 @@ public class TentsAndTrees
 	public void setTileAsGrass(TileCoordinate tile)
 	{
 		setTileAsGrass(tile.getColumn(), tile.getRow());
-	}
-
-	public boolean hasAdjacentUnoccupiedTrees(int column, int row)
-	{
-		List<TileCoordinate> unoccupiedTrees = getUnoccupiedAdjacentTrees(
-				column, row);
-
-		return unoccupiedTrees.size() > 0;
-	}
-
-	private List<TileCoordinate> getUnoccupiedAdjacentTrees(int column, int row)
-	{
-		List<TileCoordinate> adjacentTrees = getSurroundingTiles(column, row,
-				TileTypes.TREE_TILE);
-		List<TileCoordinate> unoccupiedTrees = new ArrayList<TileCoordinate>();
-
-		for (TileCoordinate t : adjacentTrees)
-		{
-			if (isUnoccupiedTree(t))
-			{
-				unoccupiedTrees.add(t);
-			}
-		}
-
-		return unoccupiedTrees;
-	}
-
-	public boolean isUnoccupiedTree(int column, int row)
-	{
-		return !hasNeighbouringTile(column, row, TileTypes.TENT_TILE);
-	}
-
-	private boolean isUnoccupiedTree(TileCoordinate tile)
-	{
-		return isUnoccupiedTree(tile.getColumn(), tile.getRow());
-	}
-
-	public boolean hasAdjacentUnoccupiedTrees(TileCoordinate tile)
-	{
-		return hasAdjacentUnoccupiedTrees(tile.getColumn(), tile.getRow());
 	}
 
 	public boolean hasTent(TileCoordinate tree)
