@@ -12,9 +12,9 @@ public class TentTreesSolver
 
 	private boolean					solved			= false;
 
-	private int						visitedTrees = 0;
+	private int						visitedTrees	= 0;
 
-	private int						totalTrees = 0;
+	private int						totalTrees		= 0;
 
 	private List<TreeCoordinate>	trees;
 
@@ -45,10 +45,17 @@ public class TentTreesSolver
 
 		if (solved)
 		{
+			boolean validated = validate();
+			printer.printLine("Validated: " + validated);
+			
+			if (validated)
+			{
+				tentsAndTrees.fillEmptySpots();
+			}
+			
 			printer.printLine("After: ");
 			printer.printTentsAndTrees(tentsAndTrees);
 			
-			printer.printLine("Validated: " + validate());
 		}
 		else
 		{
@@ -58,14 +65,14 @@ public class TentTreesSolver
 
 	private boolean validate()
 	{
-		for (TileCoordinate t : trees)
+		for (TreeCoordinate t : trees)
 		{
 			if (!tentsAndTrees.hasTent(t))
 			{
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -108,7 +115,7 @@ public class TentTreesSolver
 			}
 		}
 	}
-	
+
 	private boolean recursiveSolve()
 	{
 		return recursiveSolve(trees.get(0));
@@ -121,19 +128,19 @@ public class TentTreesSolver
 			return visitedTrees == totalTrees;
 		}
 
-		printer.printLine("Tree " + (visitedTrees++ + 1) + " out of " + totalTrees + ".");
+		printer.printLine("Tree " + (visitedTrees++ + 1) + " out of "
+				+ totalTrees + ".");
 
 		TreeCoordinate nextTree = getNextTree();
-		
+
 		List<TileCoordinate> surroundingEmptyTiles = tentsAndTrees
-				.getSurroundingEmptyTiles(currentTree);
-		
+				.getSurroundingTentLocations(currentTree);
+
 		if (currentTree.hasTent())
 		{
 			tentsAndTrees.setTilesAsGrass(surroundingEmptyTiles);
 			return recursiveSolve(nextTree);
 		}
-
 
 		if (surroundingEmptyTiles.isEmpty())
 		{
@@ -193,7 +200,7 @@ public class TentTreesSolver
 			}
 		}
 	}
-	
+
 	private TreeCoordinate getNextTree()
 	{
 		if (visitedTrees >= trees.size())
@@ -259,7 +266,7 @@ public class TentTreesSolver
 					{
 						tentsAndTrees.setTileAsTent(empty);
 						TreeCoordinate tree = tentsAndTrees.getTree(empty);
-						
+
 						if (tree != null)
 						{
 							setTentForTree(empty, tree);
@@ -284,7 +291,7 @@ public class TentTreesSolver
 					{
 						tentsAndTrees.setTileAsTent(empty);
 						TreeCoordinate tree = tentsAndTrees.getTree(empty);
-						
+
 						if (tree != null)
 						{
 							setTentForTree(empty, tree);
@@ -364,7 +371,7 @@ public class TentTreesSolver
 		if (tentsAndTrees == null)
 		{
 			tentsAndTrees = new TentsAndTrees(
-					PlayingFieldFactory.getDefaultExample());
+					PlayingFieldFactory.getEightByEightExample());
 		}
 	}
 

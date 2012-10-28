@@ -331,33 +331,26 @@ public class TentsAndTrees
 	 * @param row
 	 * @return
 	 */
-	public List<TileCoordinate> getSurroundingEmptyTiles(
-			TileCoordinate currentTree)
+	public List<TileCoordinate> getSurroundingTentLocations(
+			TreeCoordinate currentTree)
 	{
-		int column = currentTree.getColumn();
-		int row = currentTree.getRow();
-
-		if (!isTreeTile(column, row))
-		{
-			throw new IllegalArgumentException("Given tile must be a tree.");
-		}
-
 		List<TileCoordinate> retVal = new ArrayList<TileCoordinate>();
 
-		for (TileCoordinate t : getSurroundingTiles(column, row,
-				TileTypes.EMPTY_TILE))
+		for (TileCoordinate t : getSurroundingEmptyTiles(currentTree))
 		{
-			if (hasAdjacentTentInAnyDirection(t))
-			{
-				/* setTileAsGrass(t); */
-			}
-			else
+			if (!hasAdjacentTentInAnyDirection(t))
 			{
 				retVal.add(t);
 			}
 		}
 
 		return retVal;
+	}
+
+	public List<TileCoordinate> getSurroundingEmptyTiles(TileCoordinate tile)
+	{
+		return getSurroundingTiles(tile.getColumn(), tile.getRow(),
+				TileTypes.EMPTY_TILE);
 	}
 
 	private List<TileCoordinate> getSurroundingTiles(int column, int row,
@@ -459,11 +452,28 @@ public class TentsAndTrees
 		return null;
 	}
 
-	public void setTilesAsGrass(List<TileCoordinate> surroundingEmptyTiles)
+	public void setTilesAsGrass(List<TileCoordinate> emptyTiles)
 	{
-		for (TileCoordinate t : surroundingEmptyTiles)
+		for (TileCoordinate t : emptyTiles)
 		{
-			setTileAsGrass(t);
+			if (isEmptyTile(t.getColumn(), t.getRow()))
+			{
+				setTileAsGrass(t);
+			}
+		}
+	}
+
+	public void fillEmptySpots()
+	{
+		for (int i = 0; i < height; i++)
+		{
+			for (int j = 0; j < width; j++)
+			{
+				if (isEmptyTile(j, i))
+				{
+					setTileAsGrass(j, i);
+				}
+			}
 		}
 	}
 }
